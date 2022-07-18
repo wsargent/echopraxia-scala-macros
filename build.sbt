@@ -4,9 +4,9 @@ ThisBuild / scalaVersion := "2.13.8"
 val echopraxiaPlusScalaVersion = "1.0.0"
 val echopraxiaVersion = "2.1.1"
 
-lazy val inspections = (project in file("inspections"))
+lazy val macros = (project in file("macros"))
   .settings(
-    name := "inspection",
+    name := "macros",
     libraryDependencies ++= {
       // Compile / scalafmtConfig := file(".scalafmt-dotty.conf")
       CrossVersion.partialVersion(scalaVersion.value) match {
@@ -19,10 +19,9 @@ lazy val inspections = (project in file("inspections"))
     },
   )
 
-
 lazy val root = (project in file("."))
   .settings(
-    name := "untitled1",
+    name := "echopraxia-scala-macros",
 
     scalacOptions += "-Ymacro-debug-lite",
 
@@ -30,4 +29,4 @@ lazy val root = (project in file("."))
     libraryDependencies += "com.tersesystems.echopraxia.plusscala" %% "generic" % echopraxiaPlusScalaVersion,
 
     libraryDependencies +="com.tersesystems.echopraxia" % "logstash" % echopraxiaVersion,
-  ).dependsOn(inspections).aggregate(inspections)
+  ).dependsOn(macros).aggregate(macros)
