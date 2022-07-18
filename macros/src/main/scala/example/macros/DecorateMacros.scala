@@ -145,14 +145,6 @@ object DecorateMacros extends DecorateMacros {
       }
     }
 
-    def dumpExpression[A](block: c.Expr[A]): c.Expr[ExprInspection[A]] = {
-      val portion = extractRange(block.tree) getOrElse ""
-      val const   = c.Expr[String](Literal(Constant(portion)))
-      c.Expr[ExprInspection[A]](
-        q"example.macros.ExprInspection($const, $block)"
-      )
-    }
-
     def decorateVals[A](output: c.Expr[ValDefInspection => Unit])(block: c.Expr[A]): c.Expr[A] = {
       val loggedStats = block.tree.children.flatMap {
         case valdef @ ValDef(_, termName, _, _) =>
@@ -165,21 +157,6 @@ object DecorateMacros extends DecorateMacros {
       }
       val outputExpr: c.Expr[A] = c.Expr[A](c.untypecheck(q"..$loggedStats"))
       outputExpr
-    }
-
-    def dumpPublicFields[A: WeakTypeTag](instance: c.Expr[A]): c.Expr[Seq[ValDefInspection]] = {
-      def classVals(tpe: c.universe.Type) = {
-        tpe.decls.collect {
-          case method: MethodSymbol if method.isAccessor && method.isPublic =>
-            val nameStr = method.name.decodedName.toString
-            q"example.macros.ValDefInspection(${nameStr}, $instance.$method)"
-        }
-      }
-
-      val classType = weakTypeTag[A].tpe
-      val fields    = classVals(classType)
-
-      c.Expr[Seq[ValDefInspection]](q"Seq(..$fields)")
     }
 
     private def extractRange(t: Trees#Tree): Option[String] = {
