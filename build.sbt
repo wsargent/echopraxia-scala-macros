@@ -22,8 +22,9 @@ lazy val macros = (project in file("macros"))
 lazy val root = (project in file("."))
   .settings(
     name := "echopraxia-scala-macros",
+    runMain := "example.Main",
 
-    scalacOptions += "-Ymacro-debug-lite",
+    //scalacOptions += "-Ymacro-debug-lite",
 
     libraryDependencies += "com.tersesystems.echopraxia.plusscala" %% "logger" % echopraxiaPlusScalaVersion,
     libraryDependencies += "com.tersesystems.echopraxia.plusscala" %% "generic" % echopraxiaPlusScalaVersion,
