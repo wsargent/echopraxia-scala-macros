@@ -1,27 +1,19 @@
 package example
 
-import com.tersesystems.echopraxia.api.Field
-import com.tersesystems.echopraxia.plusscala.LoggerFactory
-import com.tersesystems.echopraxia.plusscala.api.FieldBuilder
-import example.macros._
-
-import java.util.Objects
-
-object Main extends DecorateMacros {
-  private val logger = LoggerFactory.getLogger.withFieldBuilder(NewFieldBuilder)
+object Main {
+  private val logger = DecorateLoggerFactory.getLogger
 
   def main(args: Array[String]): Unit = {
     val foo = new Foo("fooName", 13)
-    logger.info("{}", fb => fb.valdef("fooPublicFields", fb.dumpPublicFields(foo)))
 
     // This works fine
-    decorateIfs(dif => logger.debug(s"code = ${dif.code} result = ${dif.result}")) {
+    logger.info {
       if (System.currentTimeMillis() - 1 == 0) {
-        assert("decorateIfs: if block" != null)
+        println("decorateIfs: if block")
       } else if (System.getProperty("derp") == null) {
-        assert("decorateIfs: derp is null" != null)
+        println("decorateIfs: derp is null")
       } else {
-        assert("decorateIfs: else block" != null)
+        println("decorateIfs: else block")
       }
     }
 
@@ -55,16 +47,3 @@ object Main extends DecorateMacros {
 class Foo(val name: String, val age: Int) {
   override def toString: String = s"Foo = ${name} ${age}"
 }
-
-trait NewFieldBuilder extends FieldBuilder with DumpMacros {
-
-  def valdef(fieldName: String, instance: Seq[ValDefInspection]): Field = {
-    `obj`(fieldName, instance.map {
-      case ValDefInspection(name, value) =>
-        keyValue(name, Objects.toString(value))
-    })
-  }
-}
-
-object NewFieldBuilder extends NewFieldBuilder
-

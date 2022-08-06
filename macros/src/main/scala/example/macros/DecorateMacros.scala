@@ -1,5 +1,7 @@
 package example.macros
 
+import com.tersesystems.echopraxia.plusscala.Logger
+
 trait DecorateMacros {
 
   import scala.language.experimental.macros
@@ -32,7 +34,7 @@ trait DecorateMacros {
    * @tparam A the result type
    * @return the result of the if statement.
    */
-  def decorateIfs[A](output: BranchInspection => Unit)(ifStatement: A): A = macro impl.decorateIfs
+  def decorateIfs[A](ifStatement: A): A = macro impl.decorateIfs
 
   /**
    * Decorates a match statement with logging statements at each case.
@@ -97,7 +99,13 @@ object DecorateMacros extends DecorateMacros {
   private class impl(val c: blackbox.Context) {
     import c.universe._
 
-    def decorateIfs(output: c.Expr[BranchInspection => Unit])(ifStatement: c.Tree): c.Tree = {
+    def debug(dif: c.Expr[BranchInspection]) = {
+      q"""debug("code = {} result = {}", fb => fb.list(fb.string("code", $dif.code), fb.bool("result", $dif.result)))"""
+    }
+
+    def decorateIfs(ifStatement: c.Tree): c.Tree = {
+      val output: c.Tree = q"""println"""
+      println(ifStatement)
       ifStatement match {
         case q"if ($cond) $thenp else $elsep" =>
           val condSource = extractRange(cond) getOrElse ""
@@ -105,12 +113,13 @@ object DecorateMacros extends DecorateMacros {
             q"$output(example.macros.BranchInspection($condSource, true))"
           val elseThen =
             q"$output(example.macros.BranchInspection($condSource, false))"
-          val decElseP = decorateIfs(output)(elsep.asInstanceOf[c.Tree])
+          val decElseP = decorateIfs(elsep.asInstanceOf[c.Tree])
 
           val thenTree = q"""{ $printThen; $thenp }"""
           val elseTree = if (isEmpty(decElseP)) decElseP else q"""{ $elseThen; $decElseP }"""
           q"if ($cond) $thenTree else $elseTree"
         case other =>
+          println(other)
           other
       }
     }

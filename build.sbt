@@ -17,6 +17,8 @@ lazy val macros = (project in file("macros"))
           )
       }
     },
+    libraryDependencies += "com.tersesystems.echopraxia.plusscala" %% "logger" % echopraxiaPlusScalaVersion,
+    libraryDependencies += "com.tersesystems.echopraxia.plusscala" %% "generic" % echopraxiaPlusScalaVersion
   )
 
 lazy val root = (project in file("."))
