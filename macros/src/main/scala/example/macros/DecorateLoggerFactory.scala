@@ -1,6 +1,6 @@
-package example
+package example.macros
 
-import com.tersesystems.echopraxia.api.{Caller, CoreLoggerFactory, Utilities}
+import com.tersesystems.echopraxia.api.{Caller, CoreLoggerFactory}
 import com.tersesystems.echopraxia.plusscala.api.FieldBuilder
 
 object DecorateLoggerFactory {

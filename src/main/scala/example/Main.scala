@@ -1,13 +1,15 @@
 package example
 
+import com.tersesystems.echopraxia.plusscala.LoggerFactory
+import example.macros.{DecorateLoggerFactory, DumpFieldBuilder}
+
 object Main {
-  private val logger = DecorateLoggerFactory.getLogger
+  private val decorate = DecorateLoggerFactory.getLogger
+  private val dump = LoggerFactory.getLogger.withFieldBuilder(DumpFieldBuilder)
 
   def main(args: Array[String]): Unit = {
-    val foo = new Foo("fooName", 13)
 
-    // This works fine
-    logger.info {
+    decorate.info {
       if (System.currentTimeMillis() - 1 == 0) {
         println("decorateIfs: if block")
       } else if (System.getProperty("derp") == null) {
@@ -17,30 +19,8 @@ object Main {
       }
     }
 
-    // XXX why doesn't the below work?
-    //    scalac: Error
-    //    : Could not find proxy
-    //    for dif: example.macros.BranchInspection in List
-    //    (value dif, method $anonfun$main$8, method main,
-    //    object Main
-    //    , package example
-    //    , package <root>) (currentOwner= method $anonfun$main$9 )
-    //      java.lang.IllegalArgumentException: Could not find proxy for dif: example.macros.BranchInspection in List(value dif, method $anonfun$main$8, method main, object Main, package example, package
-    //      <root>) (currentOwner= method $anonfun$main$9 )
-    //        at scala.tools.nsc.transform.LambdaLift$LambdaLifter.searchIn$1(LambdaLift.scala:319)
-    /*
-    decorateIfs(dif => logger.debug("code = {} result = {}", fb => fb.list(
-      fb.string("code", dif.code), fb.bool("result", dif.result)))
-    ) {
-      if (System.currentTimeMillis() - 1 == 0) {
-        assert("decorateIfs: if block" != null)
-      } else if (System.getProperty("derp") == null) {
-        assert("decorateIfs: derp is null" != null)
-      } else {
-        assert("decorateIfs: else block" != null)
-      }
-    }
-    */
+    val foo = new Foo("fooName", 13)
+    dump.info("dumping fields {}", fb => fb.valdef("foo", fb.dumpPublicFields(foo)))
   }
 }
 
