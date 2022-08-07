@@ -42,12 +42,29 @@ object DumpLogger {
         case _ => extract(expr)
       }
 
+      val tpeA = implicitly[WeakTypeTag[A]].tpe
+
       // this gives us "main"
       //val logger = c.internal.enclosingOwner.asTerm
+      // XXX Need to pull this from the caller
       val logger = q"dumpLogger"
       val level = q"com.tersesystems.echopraxia.api.Level.DEBUG"
-
-      q"""$logger.core.log($level, "{}", fb => fb.keyValue($name, fb.dumpPublicFields($expr)))"""
+      
+      // XXX Need to abstract this out or pull it from the logger :-/
+      val fieldBuilderType = tq"example.MyFieldBuilder.type"
+      val function = q"""new java.util.function.Function[$fieldBuilderType, com.tersesystems.echopraxia.api.FieldBuilderResult]() {
+        def apply(fb: $fieldBuilderType): com.tersesystems.echopraxia.api.FieldBuilderResult = {
+          fb.keyValue($name, fb.ToValue[$tpeA]($expr))
+        }
+      }"""
+      q"""$logger.core.log($level, "{}", $function, $logger.fieldBuilder)"""
     }
   }
 }
+
+
+// [Seq[com.tersesystems.echopraxia.api.Field]]
+/*
+"message": "overloaded method log with alternatives:\n  [FB](x$1: com.tersesystems.echopraxia.api.Level, 
+x$2: java.util.function.Supplier[java.util.List[com.tersesystems.echopraxia.api.Field]], x$3: com.tersesystems.echopraxia.api.Condition, x$4: String, x$5: java.util.function.Function[FB,com.tersesystems.echopraxia.api.FieldBuilderResult], x$6: FB): Unit <and>\n  [FB](x$1: com.tersesystems.echopraxia.api.Level, x$2: com.tersesystems.echopraxia.api.Condition, x$3: String, x$4: java.util.function.Function[FB,com.tersesystems.echopraxia.api.FieldBuilderResult], x$5: FB): Unit <and>\n  (x$1: com.tersesystems.echopraxia.api.Level,x$2: java.util.function.Supplier[java.util.List[com.tersesystems.echopraxia.api.Field]],x$3: com.tersesystems.echopraxia.api.Condition,x$4: String)Unit <and>\n  (x$1: com.tersesystems.echopraxia.api.Level,x$2: com.tersesystems.echopraxia.api.Condition,x$3: String)Unit <and>\n  [FB](x$1: com.tersesystems.echopraxia.api.Level, x$2: java.util.function.Supplier[java.util.List[com.tersesystems.echopraxia.api.Field]], x$3: String, x$4: java.util.function.Function[FB,com.tersesystems.echopraxia.api.FieldBuilderResult], x$5: FB): Unit <and>\n  [FB](x$1: com.tersesystems.echopraxia.api.Level, x$2: String, x$3: java.util.function.Function[FB,com.tersesystems.echopraxia.api.FieldBuilderResult], x$4: FB): Unit <and>\n  (x$1: com.tersesystems.echopraxia.api.Level,x$2: java.util.function.Supplier[java.util.List[com.tersesystems.echopraxia.api.Field]],x$3: String)Unit <and>\n  (x$1: com.tersesystems.echopraxia.api.Level,x$2: String)Unit\n cannot be applied to (com.tersesystems.echopraxia.api.Level, String, example.MyFieldBuilder.type => Seq[com.tersesystems.echopraxia.api.Field])",
+*/

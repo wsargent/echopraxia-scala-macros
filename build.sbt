@@ -18,8 +18,7 @@ lazy val macros = (project in file("macros"))
           )
       }
     },
-    libraryDependencies += "com.tersesystems.echopraxia.plusscala" %% "logger" % echopraxiaPlusScalaVersion,
-    libraryDependencies += "com.tersesystems.echopraxia.plusscala" %% "generic" % echopraxiaPlusScalaVersion
+    libraryDependencies += "com.tersesystems.echopraxia.plusscala" %% "logger" % echopraxiaPlusScalaVersion    
   )
 
 lazy val root = (project in file("."))
@@ -29,8 +28,7 @@ lazy val root = (project in file("."))
 
     scalacOptions += "-Ymacro-debug-lite",
     scalacOptions += "-language:experimental.macros",
-    libraryDependencies += "com.tersesystems.echopraxia.plusscala" %% "logger" % echopraxiaPlusScalaVersion,
-    //libraryDependencies += "com.tersesystems.echopraxia.plusscala" %% "generic" % echopraxiaPlusScalaVersion,
+    libraryDependencies += "com.tersesystems.echopraxia.plusscala" %% "logger" % echopraxiaPlusScalaVersion,    
 
     libraryDependencies +="com.tersesystems.echopraxia" % "logstash" % echopraxiaVersion,
   ).dependsOn(macros).aggregate(macros)

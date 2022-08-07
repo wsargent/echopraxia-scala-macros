@@ -3,7 +3,6 @@ package example
 import com.tersesystems.echopraxia.api.CoreLoggerFactory
 import com.tersesystems.echopraxia.plusscala.LoggerFactory
 import com.tersesystems.echopraxia.plusscala.api.FieldBuilder
-import com.tersesystems.echopraxia.plusscala.generic.AutoDerivation
 import example.macros.{DecorateLoggerFactory, DumpFieldBuilder, DumpLogger}
 
 object Main {
@@ -11,7 +10,7 @@ object Main {
   private val loggerWithDumpFieldBuilder = LoggerFactory.getLogger.withFieldBuilder(DumpFieldBuilder)
 
   val coreLogger = CoreLoggerFactory.getLogger(this.getClass.getName, this.getClass.getName)
-  private val dumpLogger = new DumpLogger(coreLogger, DumpFieldBuilder)
+  private val dumpLogger = new DumpLogger(coreLogger, MyFieldBuilder)
 
   def main(args: Array[String]): Unit = {
 
@@ -37,7 +36,12 @@ class Foo(val name: String, val age: Int) {
 }
 
 trait MyFieldBuilder extends FieldBuilder {
-
+  implicit val fooToValue: ToObjectValue[Foo] = { foo => 
+    ToObjectValue(
+      keyValue("name" -> foo.name),
+      keyValue("age" -> foo.age)
+    )
+  }
 }
 
 object MyFieldBuilder extends MyFieldBuilder
