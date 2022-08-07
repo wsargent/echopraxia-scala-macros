@@ -38,11 +38,12 @@ object DecorateLogger {
 
     import c.universe._
 
-    def debug(dif: c.Expr[BranchInspection]) = {
-      q"""debug("code = {} result = {}", fb => fb.list(fb.string("code", $dif.code), fb.bool("result", $dif.result)))"""
-    }
+    //    def debug(dif: c.Expr[BranchInspection]) = {
+    //      q"""debug("code = {} result = {}", fb => fb.list(fb.string("code", $dif.code), fb.bool("result", $dif.result)))"""
+    //    }
 
     def decorateIfs(statement: c.Tree): c.Tree = {
+      // XXX use c.internal.enclosingOwner here for `logger.core.log(Level.DEBUG, "{}"
       val output: c.Tree = q"""println"""
       println(statement)
       statement match {
@@ -117,20 +118,3 @@ object DecorateLogger {
 
 }
 
-
-/**
- * Debugs a branch (if / match).
- *
- * @param code the condition of the branch
- * @param result the result of evaluating the condition
- */
-case class BranchInspection(code: String, result: Boolean)
-
-/**
- * Debugs a result.
- *
- * @param code the code that went into the result
- * @param value the result
- * @tparam A the type of the result.
- */
-case class ExprInspection[A](code: String, value: A)

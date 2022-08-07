@@ -42,11 +42,3 @@ object DumpFieldBuilder extends DumpFieldBuilder {
       }
     }
 }
-
-/**
- * Debugs a valdef.
- *
- * @param name name of the val or var
- * @param value the value of the val or var
- */
-case class ValDefInspection(name: String, value: Any)
