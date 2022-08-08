@@ -24,8 +24,43 @@ object DumpLogger {
 
   private class impl(val c: blackbox.Context) {
     import c.universe._
+    
+    def error[A: c.WeakTypeTag](expr: c.Tree) = {
+      val tpeA: Type = implicitly[WeakTypeTag[A]].tpe
+      val level: Select = q"com.tersesystems.echopraxia.api.Level.ERROR"
+
+      handle(tpeA, level, expr)
+    }
+
+    def warn[A: c.WeakTypeTag](expr: c.Tree) = {
+      val tpeA: Type = implicitly[WeakTypeTag[A]].tpe
+      val level: Select = q"com.tersesystems.echopraxia.api.Level.WARN"
+
+      handle(tpeA, level, expr)
+    }
+
+    def info[A: c.WeakTypeTag](expr: c.Tree) = {
+      val tpeA: Type = implicitly[WeakTypeTag[A]].tpe
+      val level: Select = q"com.tersesystems.echopraxia.api.Level.INFO"
+
+      handle(tpeA, level, expr)
+    }
 
     def debug[A: c.WeakTypeTag](expr: c.Tree) = {
+      val tpeA: Type = implicitly[WeakTypeTag[A]].tpe
+      val level: Select = q"com.tersesystems.echopraxia.api.Level.DEBUG"
+
+      handle(tpeA, level, expr)
+    }
+
+    def trace[A: c.WeakTypeTag](expr: c.Tree) = {
+      val tpeA: Type = implicitly[WeakTypeTag[A]].tpe
+      val level: Select = q"com.tersesystems.echopraxia.api.Level.TRACE"
+
+      handle(tpeA, level, expr)
+    }
+
+    private def handle(tpeA: Type, level: Select, expr: c.Tree) = {
       @tailrec def extract(tree: c.Tree): String = tree match {
         case Ident(n) => n.decodedName.toString
         case Select(_, n) => n.decodedName.toString
@@ -41,21 +76,11 @@ object DumpLogger {
         case Literal(Constant(_)) => c.abort(c.enclosingPosition, "Cannot provide name to static constant!")
         case _ => extract(expr)
       }
-
-      val tpeA = implicitly[WeakTypeTag[A]].tpe
-
-      // this gives us "main"
-      //val logger = c.internal.enclosingOwner.asTerm
-      // XXX Need to pull this from the caller
-      val logger = q"dumpLogger"
-      val level = q"com.tersesystems.echopraxia.api.Level.DEBUG"
       
-      // XXX Need to abstract this out or pull it from the logger :-/
-      val fieldBuilderType = tq"example.MyFieldBuilder.type"
+      val logger = c.prefix
+      val fieldBuilderType = tq"$logger.fieldBuilder.type"      
       val function = q"""new java.util.function.Function[$fieldBuilderType, com.tersesystems.echopraxia.api.FieldBuilderResult]() {
-        def apply(fb: $fieldBuilderType): com.tersesystems.echopraxia.api.FieldBuilderResult = {
-          fb.keyValue($name, fb.ToValue[$tpeA]($expr))
-        }
+        def apply(fb: $fieldBuilderType) = fb.keyValue($name, fb.ToValue[$tpeA]($expr))
       }"""
       q"""$logger.core.log($level, "{}", $function, $logger.fieldBuilder)"""
     }

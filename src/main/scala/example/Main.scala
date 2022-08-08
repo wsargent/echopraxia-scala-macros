@@ -24,7 +24,7 @@ object Main {
       }
     }
 
-    val foo = new Foo("fooName", 13)
+    val foo = new Foo("name of foo", 13)
     loggerWithDumpFieldBuilder.info("dumping fields {}", fb => fb.valdef("foo", fb.dumpPublicFields(foo)))
 
     dumpLogger.debug(foo)
